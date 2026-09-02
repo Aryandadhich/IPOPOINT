@@ -30,7 +30,7 @@ cd IPOPOINT
 ### 2. Install dependencies
 
 ```bash
-cd webapp
+cd IPOPoint/backend
 pip install -r requirements.txt
 ```
 
@@ -44,26 +44,19 @@ cp .env.example .env
 ### 4. Run
 
 ```bash
-python app.py
+python run.py
 ```
 
 App runs at **http://localhost:5000**
-
-Or with Flask CLI:
-
-```bash
-cd webapp
-flask run --port 5000
-```
 
 ---
 
 ## Production Deploy (Render.com)
 
 1. Connect your GitHub repo to [Render.com](https://render.com)
-2. Set **Root Directory** to `webapp`
+2. Set **Root Directory** to `IPOPoint/backend`
 3. Set **Build Command**: `pip install -r requirements.txt`
-4. Set **Start Command**: `gunicorn app:app`
+4. Set **Start Command**: `gunicorn run:app`
 5. Add environment variable: `SECRET_KEY` = (generate with `python -c "import secrets; print(secrets.token_hex(32))"`)
 
 ---
@@ -71,16 +64,26 @@ flask run --port 5000
 ## Project Structure
 
 ```
-webapp/
-├── app.py              ← Flask backend (auth, scraper, all API routes)
-├── requirements.txt    ← Python dependencies
-├── Procfile            ← Render.com / Heroku start command
-├── .env.example        ← Environment variable template (safe to commit)
-└── templates/
-    ├── index.html      ← Homepage (live IPOs, GMP, search)
-    ├── login.html      ← Login page
-    ├── register.html   ← Register page
-    └── tracker.html    ← Personal IPO tracker (auth-gated)
+IPOPoint/
+├── backend/
+│   ├── app/
+│   │   ├── api/          ← Auth, IPO tracker, and live scraper endpoints
+│   │   ├── models/       ← User and IPO SQLite models
+│   │   ├── services/     ← Scraper and Excel export logic
+│   │   ├── utils/        ← Auth / JWT helpers
+│   │   ├── config.py     ← App configuration
+│   │   ├── extensions.py ← DB connection & schema
+│   │   └── __init__.py   ← Flask factory & routes
+│   ├── requirements.txt  ← Python dependencies
+│   ├── Procfile          ← Render / Production start command
+│   ├── .env.example      ← Environment variable template
+│   └── run.py            ← Application entrypoint
+└── frontend/
+    ├── index.html        ← Homepage (live IPOs, GMP, search)
+    ├── login.html        ← Login page
+    ├── register.html     ← Register page
+    ├── tracker.html      ← Personal IPO tracker
+    └── static/           ← CSS & JS assets
 ```
 
 ---
@@ -88,8 +91,8 @@ webapp/
 ## Security Notes
 
 - `SECRET_KEY` must be set via environment variable in production — **never hardcode it**
-- `webapp/.env` is in `.gitignore` — never commit it
-- `webapp/ipo_data.db` is in `.gitignore` — SQLite DB is local only
+- `IPOPoint/backend/.env` is in `.gitignore` — never commit it
+- `*.db` is in `.gitignore` — SQLite DB is local only
 - All tracker API routes require JWT authentication
 - Each user only sees and can modify their own IPO data
 - Security headers applied on every response (X-Frame-Options, HSTS, etc.)
