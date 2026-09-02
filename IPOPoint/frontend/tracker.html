@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>My Tracker — IPOPoint</title>
+  <link rel="stylesheet" href="/static/css/base.css"/>
+  <link rel="stylesheet" href="/static/css/layout.css"/>
+  <link rel="stylesheet" href="/static/css/components.css"/>
+  <link rel="stylesheet" href="/static/css/pages/tracker.css"/>
+</head>
+<body>
+
+<nav id="mainNav">
+  <a href="/" class="logo">
+    <div class="logo-icon">📈</div>
+    IPO<em>Point</em>
+  </a>
+  <div class="nav-r">
+    <button class="icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
+    <div class="user-chip">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <span id="userName">Loading...</span>
+    </div>
+    <button class="btn-logout" id="logoutBtn">Logout</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>📋 My IPO Tracker</h1>
+      <p>Track applications, allotment status and listing gains across all your demat accounts</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" id="addIpoBtn">+ Add IPO</button>
+      <button class="btn-ghost"   id="refreshAllBtn">↻ Refresh All</button>
+      <button class="btn-excel"   id="exportBtn">⬇ Excel</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat"><div class="sv blue"  id="sTotal">0</div><div class="sl">Total IPOs</div></div>
+    <div class="stat"><div class="sv blue"  id="sApplied">0</div><div class="sl">Applied</div></div>
+    <div class="stat"><div class="sv green" id="sAllotted">0</div><div class="sl">Allotted</div></div>
+    <div class="stat"><div class="sv red"   id="sNotAllotted">0</div><div class="sl">Not Allotted</div></div>
+    <div class="stat"><div class="sv green" id="sGain">—</div><div class="sl">Total P&amp;L</div></div>
+    <div class="stat"><div class="sv yellow" id="sWin">—</div><div class="sl">Win Rate</div></div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-bar">
+    <input class="search-inp" type="text" id="filterInp" placeholder="🔍 Filter by IPO name..."/>
+    <span class="count-badge" id="countBadge"></span>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>IPO Name</th><th>Open</th><th>Close</th><th>Allotment</th>
+          <th>Issue ₹</th><th>GMP</th>
+          <th>(S)ACC1</th><th>Status</th>
+          <th>(A)ACC2</th><th>Status</th>
+          <th>(R)ACC3</th><th>Status</th>
+          <th>Lots</th><th>Allotment</th><th>Shares</th>
+          <th>Listing ₹</th><th>Gain/Loss</th><th>Notes</th>
+          <th>Updated</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-h">
+      <h3>Track a New IPO</h3>
+      <button class="modal-close" id="addModalClose">✕</button>
+    </div>
+    <div class="modal-sub">Enter the IPO name — dates and GMP will be auto-fetched.</div>
+    <input class="modal-inp" type="text" id="modalInp" placeholder="e.g. ESDS Software Solution"/>
+    <div class="modal-err" id="modalErr"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="addModalCancel">Cancel</button>
+      <button class="btn-confirm" id="modalBtn">Add &amp; Fetch →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module" src="/static/js/theme.js"></script>
+<script type="module" src="/static/js/toast.js"></script>
+<script type="module" src="/static/js/api.js"></script>
+<script type="module" src="/static/js/auth.js"></script>
+<script type="module" src="/static/js/tracker.js"></script>
+</body>
+</html>
