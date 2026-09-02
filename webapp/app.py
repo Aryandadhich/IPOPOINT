@@ -1,12 +1,13 @@
 import os
 import re
+import secrets
 import sqlite3
 import time
 import io
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 from functools import wraps
-from flask import Flask, request, jsonify, render_template, send_file
+from flask import Flask, request, jsonify, render_template, send_file, g
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -16,8 +17,28 @@ import openpyxl
 import bcrypt
 import jwt
 
+# ── Load .env file if present (local dev only) ────────────────────────────────
+_env_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(_env_path):
+    with open(_env_path) as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith("#") and "=" in _line:
+                _k, _v = _line.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "ipotrack-dev-secret-change-in-prod")
+
+# ── Secret key — MUST be set via SECRET_KEY env var in production ─────────────
+_secret = os.environ.get("SECRET_KEY", "")
+if not _secret:
+    # Dev fallback — auto-generate a random key per process restart
+    # This means JWT sessions invalidate on restart, which is fine for dev.
+    # In production, always set SECRET_KEY in your environment.
+    _secret = secrets.token_hex(32)
+    print("WARNING: SECRET_KEY not set. Using a random key — set SECRET_KEY in production!")
+app.config["SECRET_KEY"] = _secret
+
 DB = os.path.join(os.path.dirname(__file__), "ipo_data.db")
 JWT_EXPIRY_HOURS = 24 * 7   # 7 days
 
@@ -725,6 +746,20 @@ def export_excel():
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+# ── Security headers on every response ───────────────────────────────────────
+@app.after_request
+def set_security_headers(resp):
+    resp.headers["X-Content-Type-Options"]  = "nosniff"
+    resp.headers["X-Frame-Options"]         = "DENY"
+    resp.headers["X-XSS-Protection"]        = "1; mode=block"
+    resp.headers["Referrer-Policy"]         = "strict-origin-when-cross-origin"
+    # Only add HSTS in production (when served over HTTPS)
+    if not app.debug:
+        resp.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return resp
+
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_ENV", "production") == "development"
+    app.run(debug=debug, host="0.0.0.0", port=port)

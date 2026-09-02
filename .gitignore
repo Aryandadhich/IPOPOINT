@@ -1,42 +1,52 @@
-# Python
+# -- Python --------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
 .Python
 *.egg-info/
 dist/
 build/
+.eggs/
 
-# Virtual environments
+# -- Virtual environments ------------------------------------------------------
 venv/
 .venv/
 env/
+.env/
 
-# Environment variables
+# -- SECRETS — NEVER COMMIT ---------------------------------------------------
 .env
+webapp/.env
 *.env
+*.secret
 
-# Database (local only)
+# -- Database (local only) -----------------------------------------------------
+*.db
+*.sqlite
+*.sqlite3
 webapp/ipo_data.db
 
-# Selenium / ChromeDriver cache
+# -- Selenium / ChromeDriver cache ---------------------------------------------
 .wdm/
 
-# VS Code
+# -- IDE -----------------------------------------------------------------------
 .vscode/
+.idea/
+*.swp
+*.swo
 
-# macOS
+# -- OS ------------------------------------------------------------------------
 .DS_Store
-
-# Windows
 Thumbs.db
 desktop.ini
 
-# Logs
+# -- Logs ----------------------------------------------------------------------
 *.log
+logs/
 
-# Old unused scaffold
+# -- Old unused scaffold -------------------------------------------------------
 ipohub/
 
-# Excel tracker (local only)
+# -- Local Excel tracker -------------------------------------------------------
 IPO.xlsx
