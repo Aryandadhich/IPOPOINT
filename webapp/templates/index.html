@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>IPOPoint — Live IPO GMP, Dates & Allotment</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── DESIGN TOKENS ── */
+[data-theme="dark"]{
+  --bg:#0b0e17;--bg2:#0f1220;--surface:#141828;--surface2:#191e2e;
+  --border:#222840;--border2:#2a3050;
+  --text:#e8ecf8;--text2:#c4cadf;--muted:#7680a0;--dim:#3a4060;
+  --accent:#2ea87e;--accent2:#25916b;--accent-glow:rgba(46,168,126,.15);
+  --blue:#4878d0;--blue2:#3a5fc0;
+  --green:#2ea87e;--red:#e05555;--yellow:#c8932a;--orange:#c4682a;
+  --sh:0 2px 12px rgba(0,0,0,.4);--sh-lg:0 8px 32px rgba(0,0,0,.55);
+  --card:#141828;--card-b:#222840;
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg2:#ebeef7;--surface:#ffffff;--surface2:#f8f9fd;
+  --border:#dde2f0;--border2:#c8cedf;
+  --text:#1a1f35;--text2:#3a4060;--muted:#7080a0;--dim:#b8c0d8;
+  --accent:#1e9068;--accent2:#167a58;--accent-glow:rgba(30,144,104,.12);
+  --blue:#3060c0;--blue2:#2550a8;
+  --green:#1e9068;--red:#c83030;--yellow:#b07820;--orange:#a85018;
+  --sh:0 2px 8px rgba(0,0,0,.07);--sh-lg:0 8px 24px rgba(0,0,0,.10);
+  --card:#ffffff;--card-b:#dde2f0;
+}
+
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;transition:background .2s,color .2s;line-height:1.5}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;font-family:inherit;outline:none}
+
+/* ── NAVBAR ── */
+nav{
+  position:sticky;top:0;z-index:200;height:54px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 24px;
+  background:var(--bg);border-bottom:1px solid var(--border);
+}
+[data-theme="light"] nav{background:var(--bg)}
+.logo{font-size:17px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 6px var(--accent)}
+.logo-txt{color:var(--text)}
+.logo-txt em{font-style:normal;color:var(--accent)}
+.nav-links{display:flex;gap:2px}
+.nav-links a{padding:5px 10px;border-radius:6px;font-size:13px;font-weight:500;color:var(--muted);transition:color .12s,background .12s}
+.nav-links a:hover,.nav-links a.act{color:var(--text);background:var(--surface2)}
+.nav-r{display:flex;align-items:center;gap:8px}
+.icon-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-login{padding:5px 14px;border-radius:7px;font-size:13px;font-weight:500;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s}
+.btn-login:hover{border-color:var(--accent);color:var(--text)}
+.btn-start{padding:6px 16px;border-radius:7px;font-size:13px;font-weight:700;background:var(--accent);color:#fff;transition:background .15s,transform .15s}
+.btn-start:hover{background:var(--accent2);transform:translateY(-1px)}
+.user-chip{display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:7px;background:var(--surface);border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text2)}
+.avatar{width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff}
+
+/* ── HERO ── */
+.hero{
+  padding:32px 24px 28px;text-align:center;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 60% at 50% -10%,var(--accent-glow),transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--muted);margin-bottom:14px}
+.hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:clamp(22px,3.5vw,36px);font-weight:800;line-height:1.2;letter-spacing:-1px;margin-bottom:10px;color:var(--text)}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{font-size:14px;color:var(--muted);max-width:420px;margin:0 auto 20px;line-height:1.6}
+.search-bar{display:flex;max-width:520px;margin:0 auto;background:var(--surface);border:1.5px solid var(--border);border-radius:9px;overflow:hidden;box-shadow:var(--sh);transition:border-color .2s}
+.search-bar:focus-within{border-color:var(--accent)}
+.search-bar input{flex:1;padding:10px 15px;background:transparent;border:none;color:var(--text);font-size:13.5px;outline:none}
+.search-bar input::placeholder{color:var(--muted)}
+.search-bar button{padding:9px 18px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:background .15s;white-space:nowrap}
+.search-bar button:hover{background:var(--accent2)}
+.search-bar button:disabled{opacity:.6;cursor:wait}
+
+/* ── STATS STRIP ── */
+.stats-strip{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface)}
+.stat-item{flex:1;padding:12px 18px;display:flex;align-items:center;gap:9px;border-right:1px solid var(--border)}
+.stat-item:last-child{border-right:none}
+.si-icon{font-size:16px;opacity:.7}
+.si-val{font-size:18px;font-weight:800;line-height:1}
+.si-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-top:2px}
+
+/* ── TABS ── */
+.tabs{display:flex;padding:0 24px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:54px;z-index:100;overflow-x:auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:12px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0}
+.tab:hover{color:var(--text)}
+.tab.act{color:var(--accent);border-color:var(--accent)}
+.tab .ct{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;font-size:10px;font-weight:700;margin-left:5px;background:var(--surface2);color:var(--muted)}
+.tab.act .ct{background:var(--accent-glow);color:var(--accent)}
+
+/* ── MAIN LAYOUT ── */
+.main{display:flex;min-height:calc(100vh - 280px)}
+.cards-col{flex:1;padding:22px 24px;min-width:0}
+
+/* ── SECTION HEADER ── */
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-title{font-size:15px;font-weight:700;letter-spacing:-.2px;color:var(--text)}
+.sec-title em{font-style:normal;color:var(--accent)}
+.sec-refresh{font-size:12px;font-weight:600;color:var(--muted);padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;transition:border-color .15s,color .15s}
+.sec-refresh:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:14px}
+
+/* ── IPO CARD ── */
+.ipo-card{
+  background:var(--card);border:1px solid var(--card-b);border-radius:12px;
+  padding:16px;cursor:pointer;
+  transition:transform .18s,border-color .18s,box-shadow .18s;
+  position:relative;overflow:hidden;
+  animation:fadeUp .35s ease both;
+}
+.ipo-card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 4px 20px var(--accent-glow)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:11px}
+.c-logo{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;font-family:monospace}
+.c-badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:58%}
+.badge{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap;letter-spacing:.1px}
+.b-open  {background:rgba(46,168,126,.08);color:var(--green);border:1px solid rgba(46,168,126,.2)}
+.b-up    {background:rgba(200,147,42,.08);color:var(--yellow);border:1px solid rgba(200,147,42,.2)}
+.b-close {background:rgba(224,85,85,.08);color:var(--red);border:1px solid rgba(224,85,85,.2)}
+.b-hot   {background:rgba(196,104,42,.08);color:var(--orange);border:1px solid rgba(196,104,42,.2)}
+.b-allot {background:rgba(72,120,208,.08);color:var(--blue);border:1px solid rgba(72,120,208,.2)}
+.c-name{font-size:14.5px;font-weight:700;margin-bottom:2px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.c-sub{font-size:11px;color:var(--muted)}
+.score-row{display:flex;align-items:center;gap:8px;margin:10px 0 5px}
+.score-bar-wrap{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.score-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.score-num{font-size:11px;font-weight:800;min-width:26px;text-align:right}
+.score-tag{font-size:10px;font-weight:600;margin-bottom:10px;color:var(--muted)}
+.meta-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:11px}
+.m-item .ml{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:2px}
+.m-item .mv{font-size:12.5px;font-weight:700;color:var(--text)}
+.gp{color:var(--green)}.gn{color:var(--red)}.gm{color:var(--muted)}
+.cd-text{font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:500}
+.cd-text span{color:var(--text);font-weight:700}
+.c-actions{display:flex;gap:6px}
+.btn-apply{flex:1;padding:8px;border-radius:7px;font-size:12px;font-weight:700;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:background .15s,transform .12s}
+.btn-apply:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-track{padding:8px 11px;border-radius:7px;font-size:12px;font-weight:600;background:transparent;color:var(--muted);border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.btn-track:hover{border-color:var(--accent);color:var(--text)}
+
+/* ── SIDEBAR ── */
+.sidebar{width:290px;flex-shrink:0;padding:22px 20px 22px 0;border-left:1px solid var(--border)}
+.side-section{margin-bottom:26px}
+.side-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px}
+
+/* GMP RANKS */
+.gmp-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;background:var(--surface);border:1px solid var(--border);margin-bottom:7px;cursor:pointer;transition:border-color .15s,transform .12s}
+.gmp-item:hover{border-color:var(--accent);transform:translateX(2px)}
+.gmp-rank{font-size:13px;font-weight:800;min-width:18px;color:var(--muted);text-align:center}
+.gmp-rank.r1{color:var(--yellow)}.gmp-rank.r2{color:var(--muted)}.gmp-rank.r3{color:var(--orange)}
+.gmp-logo{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.gmp-info{flex:1;min-width:0}
+.gmp-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.gmp-date{font-size:10px;color:var(--muted);margin-top:1px}
+.gmp-val{font-size:14px;font-weight:800;color:var(--green);white-space:nowrap}
+
+/* BROKERS */
+.broker-row{display:flex;flex-direction:column;gap:7px}
+.broker-pill{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-radius:9px;background:var(--surface);border:1px solid var(--border);text-decoration:none;color:var(--text);font-size:13px;font-weight:600;transition:border-color .15s,transform .12s}
+.broker-pill:hover{border-color:var(--accent);transform:translateX(2px)}
+.broker-l{display:flex;align-items:center;gap:9px}
+.broker-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.broker-arrow{font-size:11px;color:var(--muted)}
+
+/* PREMIUM CARD */
+.premium-card{
+  border-radius:12px;padding:18px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+}
+.premium-card h3{font-size:14px;font-weight:800;margin-bottom:5px;color:var(--text)}
+.premium-card p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px}
+.p-feats{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.p-feat{font-size:11px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:5px}
+.p-feat::before{content:'✓';color:var(--accent);font-weight:800}
+.p-price{font-size:20px;font-weight:800;color:var(--accent);margin-bottom:10px}
+.btn-upgrade{width:100%;padding:9px;border-radius:7px;font-size:13px;font-weight:700;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:background .15s}
+.btn-upgrade:hover{background:var(--accent2)}
+
+/* ALLOTMENT SOURCE NOTICE */
+.allot-notice{
+  display:flex;align-items:flex-start;gap:10px;padding:12px 14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:9px;
+  margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.5
+}
+.allot-notice .ni{font-size:16px;flex-shrink:0;margin-top:1px}
+.allot-notice strong{color:var(--text)}
+
+/* EMPTY / LOADING */
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .ei{font-size:36px;margin-bottom:12px;opacity:.45}
+.loading-state{display:flex;flex-direction:column;gap:12px}
+.skel{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:10px;height:210px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:440px;width:100%;box-shadow:var(--sh-lg);animation:fadeUp .2s ease}
+.modal-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+.modal-h h3{font-size:16px;font-weight:800;color:var(--text)}
+.modal-close{background:transparent;border:none;color:var(--muted);font-size:17px;cursor:pointer}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.modal-inp{width:100%;padding:10px 13px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:13.5px;outline:none;margin-bottom:6px}
+.modal-inp:focus{border-color:var(--accent)}
+.modal-err{font-size:11px;color:var(--red);margin-bottom:7px;display:none}
+.modal-actions{display:flex;gap:7px;justify-content:flex-end}
+.btn-cancel{padding:7px 14px;border-radius:7px;font-size:12px;background:transparent;color:var(--muted);border:1px solid var(--border);cursor:pointer}
+.btn-confirm{padding:7px 16px;border-radius:7px;font-size:12px;font-weight:700;background:var(--accent);color:#fff;border:none;cursor:pointer}
+.btn-confirm:disabled{opacity:.6;cursor:wait}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;right:20px;padding:9px 15px;border-radius:8px;font-size:12.5px;font-weight:600;z-index:999;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;transform:translateY(5px)}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.ok {background:rgba(46,168,126,.12);color:var(--green);border:1px solid rgba(46,168,126,.25)}
+#toast.err{background:rgba(224,85,85,.12);color:var(--red);border:1px solid rgba(224,85,85,.25)}
+#toast.inf{background:rgba(72,120,208,.12);color:var(--blue);border:1px solid rgba(72,120,208,.25)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp .55s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--surface)}
+.f-logo{font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px;color:var(--text)}
+.f-logo-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.f-logo em{font-style:normal;color:var(--accent)}
+footer p{font-size:11px;color:var(--muted)}
+
+@media(max-width:900px){
+  nav{padding:0 16px}
+  .nav-links{display:none}
+  .hero{padding:20px 16px}
+  .stats-strip{overflow-x:auto}
+  .stat-item{min-width:110px}
+  .tabs{padding:0 12px}
+  .cards-col{padding:16px}
+  .sidebar{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-txt">IPO<em>Point</em></span>
+  </a>
+  <div class="nav-links">
+    <a href="#live" class="act">Live IPOs</a>
+    <a href="#upcoming">Upcoming</a>
+    <a href="#gmp">GMP</a>
+    <a href="#" onclick="toast('Allotment checker — coming soon!','inf');return false">Allotment</a>
+  </div>
+  <div class="nav-r">
+    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <div id="navGuest" style="display:flex;align-items:center;gap:7px">
+      <a href="/login"><button class="btn-login">Login</button></a>
+      <a href="/register"><button class="btn-start">Get Started</button></a>
+    </div>
+    <div id="navUser" style="display:none;align-items:center;gap:7px">
+      <div class="user-chip">
+        <div class="avatar" id="navAvatar">A</div>
+        <span id="navName">User</span>
+      </div>
+      <a href="/tracker"><button class="btn-login">My Tracker</button></a>
+      <button class="btn-login" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow"><div class="dot"></div> Live data from InvestorGain</div>
+  <h1>India's Cleanest<br><em>IPO Discovery</em> Platform</h1>
+  <p>Live GMP, allotment dates, and IPO scores — track every IPO across your demat accounts</p>
+  <div class="search-bar">
+    <input type="text" id="searchInp" placeholder="Search IPO to track — e.g. ESDS, Ola, Hyundai..."/>
+    <button id="searchBtn" onclick="trackIPO()">+ Track IPO</button>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stat-item">
+    <div class="si-icon">🔴</div>
+    <div><div class="si-val" id="sLive" style="color:var(--accent)">—</div><div class="si-lbl">Live Now</div></div>
+  </div>
+  <div class="stat-item">
+    <div class="si-icon">📅</div>
+    <div><div class="si-val" id="sUp" style="color:var(--yellow)">—</div><div class="si-lbl">Upcoming</div></div>
+  </div>
+  <div class="stat-item">
+    <div class="si-icon">📈</div>
+    <div><div class="si-val" id="sGMP" style="color:var(--green)">—</div><div class="si-lbl">Best GMP</div></div>
+  </div>
+  <div class="stat-item">
+    <div class="si-icon">⏰</div>
+    <div><div class="si-val" id="sClose" style="color:var(--red)">—</div><div class="si-lbl">Closing Today</div></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab act" id="tab-live" onclick="switchTab('live')">Live IPOs <span class="ct" id="ct-live">—</span></div>
+  <div class="tab" id="tab-upcoming" onclick="switchTab('upcoming')">Upcoming <span class="ct" id="ct-upcoming">—</span></div>
+  <div class="tab" id="tab-gmp" onclick="switchTab('gmp')">Top GMP <span class="ct" id="ct-gmp">—</span></div>
+  <div class="tab" id="tab-allotted" onclick="switchTab('allotted')">Allotted <span class="ct" id="ct-allotted">—</span></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="cards-col">
+    <div class="sec-h">
+      <div class="sec-title" id="secTitle"><em>Live</em> IPOs</div>
+      <button class="sec-refresh" id="refreshBtn" onclick="loadLiveIPOs()">↻ Refresh</button>
+    </div>
+    <!-- Allotment notice (hidden by default, shown on allotted tab) -->
+    <div class="allot-notice" id="allotNotice" style="display:none">
+      <div class="ni">ℹ️</div>
+      <div><strong>Allotment data</strong> is sourced live from InvestorGain.com — IPOs that have been allotted appear here automatically. To check if <em>you personally</em> were allotted, visit the registrar's website. Auto-checker coming soon in <strong>IPOPoint Premium</strong>.</div>
+    </div>
+    <div id="cardsArea">
+      <div class="loading-state">
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- Top GMP -->
+    <div class="side-section">
+      <div class="side-title">Top GMP Today</div>
+      <div id="sideGMP"><div class="skel" style="height:150px"></div></div>
+    </div>
+
+    <!-- Apply via Broker -->
+    <div class="side-section">
+      <div class="side-title">Apply via Broker</div>
+      <div class="broker-row">
+        <a class="broker-pill" href="https://zerodha.com/ipo/" target="_blank" rel="noopener">
+          <div class="broker-l"><div class="broker-dot" style="background:#387ed1"></div>Zerodha</div>
+          <div class="broker-arrow">↗</div>
+        </a>
+        <a class="broker-pill" href="https://groww.in/ipo/mainboard" target="_blank" rel="noopener">
+          <div class="broker-l"><div class="broker-dot" style="background:#00d09c"></div>Groww</div>
+          <div class="broker-arrow">↗</div>
+        </a>
+        <a class="broker-pill" href="https://dhan.co/ipo/" target="_blank" rel="noopener">
+          <div class="broker-l"><div class="broker-dot" style="background:#1a3de4"></div>Dhan</div>
+          <div class="broker-arrow">↗</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Premium -->
+    <div class="premium-card">
+      <h3>IPOPoint Premium</h3>
+      <p>Get alerts, auto allotment checker, and AI-based IPO scoring before you apply.</p>
+      <div class="p-feats">
+        <div class="p-feat">Real-Time GMP Alerts</div>
+        <div class="p-feat">WhatsApp Notifications</div>
+        <div class="p-feat">AI IPO Score</div>
+        <div class="p-feat">Auto Allotment Checker</div>
+      </div>
+      <div class="p-price">₹99<span style="font-size:12px;color:var(--muted)">/month</span></div>
+      <button class="btn-upgrade" onclick="toast('Premium launching soon!','inf')">Get Premium →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-logo"><div class="f-logo-dot"></div>IPO<em>Point</em></div>
+  <p>Data sourced from InvestorGain.com · Not financial advice</p>
+  <p style="font-size:11px;color:var(--muted)">© 2025 IPOPoint</p>
+</footer>
+
+<!-- TRACK MODAL -->
+<div class="overlay" id="trackModal">
+  <div class="modal">
+    <div class="modal-h">
+      <h3>Track an IPO</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-sub">Enter the IPO name — dates and GMP will be auto-fetched and saved to your tracker.</div>
+    <input class="modal-inp" type="text" id="modalInp" placeholder="e.g. ESDS Software Solution"/>
+    <div class="modal-err" id="modalErr"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" id="modalBtn" onclick="addToTracker()">Add &amp; Fetch →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let ALL_IPOS = [];
+let CUR_TAB  = 'live';
+const TOKEN  = () => localStorage.getItem('ipo_token') || '';
+
+const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function parseDate(s){
+  if(!s) return null;
+  const [d,m] = s.split('-');
+  if(!Object.prototype.hasOwnProperty.call(MONTHS,m)) return null;
+  return new Date(new Date().getFullYear(), MONTHS[m], parseInt(d));
+}
+function today(){const t=new Date();t.setHours(0,0,0,0);return t}
+function daysDiff(d){return d?Math.ceil((d-today())/86400000):null}
+
+function logoGrad(name){
+  const h=([...name].reduce((a,c)=>a+c.charCodeAt(0),0)*53)%360;
+  return `linear-gradient(135deg,hsl(${h},40%,30%),hsl(${(h+45)%360},50%,22%))`;
+}
+function initials(n){return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'IP'}
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+function toggleTheme(){
+  const h=document.documentElement,next=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme',next);
+  document.getElementById('themeBtn').textContent=next==='dark'?'🌙':'☀️';
+  localStorage.setItem('ipo-theme',next);
+}
+(function(){
+  const t=localStorage.getItem('ipo-theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('themeBtn').textContent=t==='dark'?'🌙':'☀️';
+})();
+
+// ── AUTH NAV ──────────────────────────────────────────────────────────────────
+function updateNavAuth(){
+  const token=TOKEN();
+  if(!token) return;
+  fetch('/api/auth/me',{headers:{Authorization:'Bearer '+token}})
+    .then(r=>r.ok?r.json():null)
+    .then(u=>{
+      if(!u) return;
+      document.getElementById('navGuest').style.display='none';
+      const nu=document.getElementById('navUser');
+      nu.style.display='flex';
+      document.getElementById('navAvatar').textContent=u.name[0].toUpperCase();
+      document.getElementById('navName').textContent=u.name.split(' ')[0];
+    }).catch(()=>{});
+}
+async function doLogout(){
+  await fetch('/api/auth/logout',{method:'POST'});
+  localStorage.removeItem('ipo_token');
+  localStorage.removeItem('ipo_user');
+  document.getElementById('navUser').style.display='none';
+  document.getElementById('navGuest').style.display='flex';
+  toast('Logged out','ok');
+}
+
+// ── LOAD LIVE IPOs ────────────────────────────────────────────────────────────
+async function loadLiveIPOs(){
+  const btn=document.getElementById('refreshBtn');
+  btn.innerHTML='<span class="spin" style="border-top-color:var(--muted)"></span>';
+  btn.disabled=true;
+  document.getElementById('cardsArea').innerHTML='<div class="loading-state"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>';
+  try{
+    const r=await fetch('/api/live-ipos');
+    if(!r.ok){ showEmpty('Could not load IPOs. Try refreshing.'); return; }
+    ALL_IPOS=await r.json();
+    renderTab(CUR_TAB);
+    updateStats();
+    renderSideGMP();
+  }catch(e){
+    showEmpty('Network error. Check connection.');
+  }finally{
+    btn.innerHTML='↻ Refresh';
+    btn.disabled=false;
+  }
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function updateStats(){
+  const t=today();
+  const live=ALL_IPOS.filter(x=>{
+    const o=parseDate(x.open_date),c=parseDate(x.close_date);
+    return o&&c&&o<=t&&c>=t;
+  });
+  const up=ALL_IPOS.filter(x=>{const o=parseDate(x.open_date);return o&&o>t});
+  const closing=ALL_IPOS.filter(x=>{const c=parseDate(x.close_date);return c&&daysDiff(c)===0});
+  const withGMP=ALL_IPOS.filter(x=>x.gmp_num&&x.gmp_num>0);
+
+  document.getElementById('sLive').textContent=live.length;
+  document.getElementById('sUp').textContent=up.length;
+  document.getElementById('sClose').textContent=closing.length;
+
+  document.getElementById('ct-live').textContent=live.length;
+  document.getElementById('ct-upcoming').textContent=up.length;
+  document.getElementById('ct-gmp').textContent=withGMP.length;
+  document.getElementById('ct-allotted').textContent=ALL_IPOS.filter(x=>x.status==='allotted').length;
+
+  if(withGMP.length){
+    const top=[...withGMP].sort((a,b)=>b.gmp_num-a.gmp_num)[0];
+    document.getElementById('sGMP').textContent=(top.gmp_num>0?'+':'')+top.gmp;
+  }
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(tab){
+  CUR_TAB=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('act'));
+  document.getElementById('tab-'+tab).classList.add('act');
+  document.getElementById('allotNotice').style.display=tab==='allotted'?'flex':'none';
+  renderTab(tab);
+}
+function renderTab(tab){
+  const t=today();
+  let ipos=[],title='';
+  if(tab==='live'){
+    ipos=ALL_IPOS.filter(x=>{
+      const o=parseDate(x.open_date),c=parseDate(x.close_date);
+      if(o&&c) return o<=t&&c>=t;
+      return x.status==='open';
+    });
+    title='<em>Live</em> IPOs';
+  }else if(tab==='upcoming'){
+    ipos=ALL_IPOS.filter(x=>{const o=parseDate(x.open_date);return o&&o>t});
+    title='<em>Upcoming</em> IPOs';
+  }else if(tab==='gmp'){
+    ipos=[...ALL_IPOS].filter(x=>x.gmp_num).sort((a,b)=>b.gmp_num-a.gmp_num);
+    title='Top <em>GMP</em> Rankings';
+  }else if(tab==='allotted'){
+    ipos=ALL_IPOS.filter(x=>x.status==='allotted');
+    title='<em>Allotted</em> IPOs';
+  }
+  document.getElementById('secTitle').innerHTML=title;
+  renderCards(ipos);
+}
+
+// ── CARD HTML ─────────────────────────────────────────────────────────────────
+function ipoCardHTML(ipo){
+  const n=ipo.gmp_num||0;
+  const gc=n>0?'gp':n<0?'gn':'gm';
+  const gt=ipo.gmp?(n>0?'+':'')+ipo.gmp:'—';
+
+  const badges=[];
+  const c=parseDate(ipo.close_date),o=parseDate(ipo.open_date),t=today();
+  if(c&&o&&o<=t&&c>=t){
+    const d=daysDiff(c);
+    if(d===0) badges.push('<span class="badge b-close">Closing Today</span>');
+    else if(d<=2) badges.push('<span class="badge b-close">Closing Soon</span>');
+    else badges.push('<span class="badge b-open">Open</span>');
+  }else if(o&&o>t){
+    badges.push('<span class="badge b-up">Upcoming</span>');
+  }
+  if(ipo.status==='allotted') badges.push('<span class="badge b-allot">Allotted</span>');
+  if(n>60) badges.push('<span class="badge b-hot">Hot GMP</span>');
+
+  const score=Math.min(100,Math.max(0,50+n));
+  const sc=score>=70?'var(--green)':score>=45?'var(--yellow)':'var(--red)';
+  const sl=score>=70?'Strong':'score>=45'?'Neutral':'Risky';
+
+  let cd='';
+  if(c&&o&&o<=t&&c>=t){
+    const diff=c-new Date();
+    if(diff>0){const dd=Math.floor(diff/86400000),hh=Math.floor((diff%86400000)/3600000);cd=`<div class="cd-text">Closes in <span>${dd>0?dd+'d ':''} ${hh}h</span></div>`}
+  }else if(o&&o>t){
+    const dd=Math.floor((o-new Date())/86400000);
+    cd=`<div class="cd-text">Opens in <span>${dd} day${dd!==1?'s':''}</span></div>`;
+  }
+
+  const ip=parseInt(ipo.issue_price||0);
+  const minInv=ip>0?'₹'+(Math.round(ip*10/100)*100||ip*10).toLocaleString('en-IN'):'—';
+
+  return `
+  <div class="ipo-card" onclick="openDetail('${ipo.name.replace(/'/g,"\\'")}')">
+    <div class="card-top">
+      <div class="c-logo" style="background:${logoGrad(ipo.name)}">${initials(ipo.name)}</div>
+      <div class="c-badges">${badges.join('')}</div>
+    </div>
+    <div class="c-name" title="${ipo.name}">${ipo.name}</div>
+    <div class="c-sub">Min investment: ${minInv}</div>
+    <div class="score-row">
+      <div class="score-bar-wrap"><div class="score-fill" style="width:${score}%;background:${sc}"></div></div>
+      <div class="score-num" style="color:${sc}">${Math.round(score)}</div>
+    </div>
+    <div class="score-tag">${sl} · IPO Score</div>
+    <div class="meta-row">
+      <div class="m-item"><div class="ml">GMP</div><div class="mv ${gc}">${gt}</div></div>
+      <div class="m-item"><div class="ml">Open</div><div class="mv">${ipo.open_date||'—'}</div></div>
+      <div class="m-item"><div class="ml">Close</div><div class="mv">${ipo.close_date||'—'}</div></div>
+    </div>
+    ${cd}
+    <div class="c-actions" onclick="event.stopPropagation()">
+      <button class="btn-apply" onclick="applyNow('${ipo.name.replace(/'/g,"\\'")}')">Apply Now →</button>
+      <button class="btn-track" onclick="trackFromCard('${ipo.name.replace(/'/g,"\\'")}')">+ Track</button>
+    </div>
+  </div>`;
+}
+
+function renderCards(ipos){
+  const el=document.getElementById('cardsArea');
+  if(!ipos.length){
+    el.innerHTML=`<div class="empty-state"><div class="ei">📋</div><p style="font-size:13px;color:var(--muted)">No IPOs in this category right now</p><small style="font-size:11px">Try refreshing or switch tabs</small></div>`;
+    return;
+  }
+  el.innerHTML=`<div class="grid">${ipos.map(ipoCardHTML).join('')}</div>`;
+}
+function showEmpty(msg){
+  document.getElementById('cardsArea').innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><p style="font-size:13px">${msg}</p></div>`;
+}
+
+// ── SIDEBAR GMP ───────────────────────────────────────────────────────────────
+function renderSideGMP(){
+  const sorted=[...ALL_IPOS].filter(x=>x.gmp_num>0).sort((a,b)=>b.gmp_num-a.gmp_num).slice(0,5);
+  const el=document.getElementById('sideGMP');
+  if(!sorted.length){el.innerHTML='<p style="font-size:12px;color:var(--muted)">No GMP data yet</p>';return;}
+  el.innerHTML=sorted.map((ipo,i)=>`
+    <div class="gmp-item" onclick="openDetail('${ipo.name.replace(/'/g,"\\'")}')">
+      <div class="gmp-rank ${i<3?'r'+(i+1):''}">#${i+1}</div>
+      <div class="gmp-logo" style="background:${logoGrad(ipo.name)}">${initials(ipo.name)}</div>
+      <div class="gmp-info">
+        <div class="gmp-name">${ipo.name}</div>
+        <div class="gmp-date">${ipo.close_date?'Closes '+ipo.close_date:'—'}</div>
+      </div>
+      <div class="gmp-val">+${ipo.gmp}</div>
+    </div>`).join('');
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────────
+function openDetail(name){
+  toast(`${name} — Detail page coming soon!`,'inf');
+}
+function applyNow(name){
+  window.open('https://zerodha.com/ipo/','_blank');
+  toast('Opening Zerodha IPO page','inf');
+}
+function trackFromCard(name){
+  document.getElementById('modalInp').value=name;
+  document.getElementById('trackModal').classList.add('open');
+  document.getElementById('modalErr').style.display='none';
+}
+function trackIPO(){
+  const v=document.getElementById('searchInp').value.trim();
+  if(!v) return;
+  document.getElementById('modalInp').value=v;
+  document.getElementById('trackModal').classList.add('open');
+  document.getElementById('modalErr').style.display='none';
+}
+function closeModal(){document.getElementById('trackModal').classList.remove('open')}
+
+async function addToTracker(){
+  const name=document.getElementById('modalInp').value.trim();
+  const errEl=document.getElementById('modalErr');
+  if(!name){errEl.textContent='Please enter an IPO name';errEl.style.display='block';return;}
+  if(!TOKEN()){
+    closeModal();
+    toast('Please login first to track IPOs','inf');
+    setTimeout(()=>window.location.href='/login',1200);
+    return;
+  }
+  const btn=document.getElementById('modalBtn');
+  btn.innerHTML='<span class="spin"></span>Fetching...';btn.disabled=true;
+  errEl.style.display='none';
+  try{
+    const r=await fetch('/api/ipos',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN()},body:JSON.stringify({name})});
+    const d=await r.json();
+    if(!r.ok){errEl.textContent=d.error||'Error';errEl.style.display='block';return;}
+    closeModal();
+    document.getElementById('searchInp').value='';
+    toast(`"${d.name}" added to your tracker`,'ok');
+  }catch(e){errEl.textContent='Network error';errEl.style.display='block';}
+  finally{btn.innerHTML='Add &amp; Fetch →';btn.disabled=false;}
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let tt;
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className=`show ${type}`;
+  clearTimeout(tt);tt=setTimeout(()=>el.className='',3200);
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  updateNavAuth();
+  loadLiveIPOs();
+  document.getElementById('searchInp').addEventListener('keydown',e=>{if(e.key==='Enter') trackIPO()});
+  document.getElementById('modalInp').addEventListener('keydown',e=>{if(e.key==='Enter') addToTracker()});
+  document.getElementById('trackModal').addEventListener('click',e=>{if(e.target.id==='trackModal') closeModal()});
+});
+</script>
+</body>
+</html>

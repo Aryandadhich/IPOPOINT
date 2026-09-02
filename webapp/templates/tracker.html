@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>My Tracker — IPOPoint</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+[data-theme="dark"]{--bg:#08090f;--bg2:#0d0f1a;--surface:#10121c;--border:#1e2235;--border2:#252840;--text:#f0f2ff;--muted:#6b7280;--blue:#4f8ef7;--blue2:#6366f1;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--shadow:0 4px 24px rgba(0,0,0,.5);--shadow-lg:0 12px 48px rgba(0,0,0,.6)}
+[data-theme="light"]{--bg:#f0f2f8;--bg2:#e8ebf4;--surface:#ffffff;--border:#dde1f0;--border2:#c8cede;--text:#111827;--muted:#6b7280;--blue:#3b82f6;--blue2:#6366f1;--green:#16a34a;--red:#dc2626;--yellow:#d97706;--shadow:0 4px 16px rgba(0,0,0,.08);--shadow-lg:0 12px 40px rgba(0,0,0,.12)}
+body{font-family:-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;transition:background .3s,color .3s}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;font-family:inherit}
+
+/* NAVBAR */
+nav{position:sticky;top:0;z-index:200;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(8,9,15,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+[data-theme="light"] nav{background:rgba(255,255,255,.92)}
+.logo{font-size:18px;font-weight:800;letter-spacing:-1px;display:flex;align-items:center;gap:6px}
+.logo-icon{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;font-size:12px}
+.logo span{background:linear-gradient(90deg,var(--blue),var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-right{display:flex;align-items:center;gap:8px}
+.user-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:var(--surface);border:1px solid var(--border);font-size:13px;font-weight:500}
+.user-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.theme-toggle{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.theme-toggle:hover{border-color:var(--blue);color:var(--blue)}
+.btn-logout{padding:6px 14px;border-radius:8px;font-size:12px;background:transparent;color:var(--muted);border:1px solid var(--border);cursor:pointer}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+/* PAGE */
+.page{max-width:1300px;margin:0 auto;padding:32px 32px}
+
+/* HEADER */
+.page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.page-header h1{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.page-header p{font-size:13px;color:var(--muted);margin-top:2px}
+.header-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn-primary{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;cursor:pointer;transition:opacity .15s,transform .15s;box-shadow:0 2px 10px rgba(79,142,247,.25)}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+.btn-ghost{padding:9px 14px;border-radius:9px;font-size:13px;background:transparent;color:var(--muted);border:1px solid var(--border);cursor:pointer;transition:border-color .15s,color .15s}
+.btn-ghost:hover{border-color:var(--blue);color:var(--text)}
+.btn-excel{padding:9px 14px;border-radius:9px;font-size:13px;background:transparent;color:var(--green);border:1px solid rgba(34,197,94,.3);cursor:pointer}
+.btn-excel:hover{background:rgba(34,197,94,.06)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.stat .sv{font-size:24px;font-weight:800;margin-bottom:4px}
+.stat .sl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.search-inp{padding:9px 14px;border-radius:9px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:13px;outline:none;width:240px}
+.search-inp:focus{border-color:var(--blue)}
+.count-badge{font-size:12px;color:var(--muted);margin-left:auto}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--bg2);padding:10px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+tbody tr{border-top:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--bg2)}
+tbody td{padding:10px 12px;white-space:nowrap;vertical-align:middle;font-size:13px}
+.editable{background:transparent;border:1px solid transparent;border-radius:5px;padding:3px 6px;color:var(--text);font-size:12px;width:100%;min-width:70px;outline:none;font-family:inherit}
+.editable:focus{border-color:var(--blue);background:var(--bg)}
+select.editable{cursor:pointer}
+.gp{color:var(--green);font-weight:700}.gn{color:var(--red);font-weight:700}.gm{color:var(--muted)}
+.ipo-name-cell{font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+
+/* EMPTY */
+.empty{text-align:center;padding:64px 20px;color:var(--muted)}
+.empty .ei{font-size:48px;margin-bottom:14px;opacity:.5}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px;max-width:480px;width:100%;box-shadow:var(--shadow-lg);animation:fadeUp .25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.modal-h h3{font-size:18px;font-weight:800}
+.modal-close{background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+.modal-inp{width:100%;padding:12px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-size:14px;outline:none;margin-bottom:8px}
+.modal-inp:focus{border-color:var(--blue)}
+.modal-err{font-size:12px;color:var(--red);margin-bottom:10px;display:none}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.btn-cancel{padding:9px 18px;border-radius:8px;font-size:13px;background:transparent;color:var(--muted);border:1px solid var(--border);cursor:pointer}
+.btn-confirm{padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;cursor:pointer}
+.btn-confirm:disabled{opacity:.6;cursor:wait}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:600;z-index:999;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;transform:translateY(6px)}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.ok{background:#0f2a1a;color:#22c55e;border:1px solid rgba(34,197,94,.3)}
+#toast.err{background:#2d1515;color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+#toast.inf{background:#0f1f3d;color:var(--blue);border:1px solid rgba(79,142,247,.3)}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo"><div class="logo-icon">📈</div>IPO<span>Point</span></a>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+    <div class="user-chip">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <span id="userName">Loading...</span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>📋 My IPO Tracker</h1>
+      <p>Track applications, allotment status and listing gains across all your demat accounts</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="openAddModal()">+ Add IPO</button>
+      <button class="btn-ghost" onclick="refreshAll()" id="refreshBtn">↻ Refresh All</button>
+      <button class="btn-excel" onclick="exportExcel()">⬇ Excel</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat"><div class="sv" id="sTotal" style="color:var(--blue)">0</div><div class="sl">Total IPOs</div></div>
+    <div class="stat"><div class="sv" id="sApplied" style="color:var(--blue)">0</div><div class="sl">Applied</div></div>
+    <div class="stat"><div class="sv" id="sAllotted" style="color:var(--green)">0</div><div class="sl">Allotted</div></div>
+    <div class="stat"><div class="sv" id="sNotAllotted" style="color:var(--red)">0</div><div class="sl">Not Allotted</div></div>
+    <div class="stat"><div class="sv" id="sGain" style="color:var(--green)">—</div><div class="sl">Total P&amp;L</div></div>
+    <div class="stat"><div class="sv" id="sWin" style="color:var(--yellow)">—</div><div class="sl">Win Rate</div></div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-bar">
+    <input class="search-inp" type="text" id="filterInp" placeholder="🔍 Filter by IPO name..." oninput="filterTable()"/>
+    <span class="count-badge" id="countBadge"></span>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>IPO Name</th><th>Open</th><th>Close</th><th>Allotment</th>
+          <th>Issue ₹</th><th>GMP</th>
+          <th>(S)ACC1</th><th>Status</th>
+          <th>(A)ACC2</th><th>Status</th>
+          <th>(R)ACC3</th><th>Status</th>
+          <th>Lots</th><th>Allotment</th><th>Shares</th>
+          <th>Listing ₹</th><th>Gain/Loss</th><th>Notes</th>
+          <th>Updated</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-h">
+      <h3>Track a New IPO</h3>
+      <button class="modal-close" onclick="closeAddModal()">✕</button>
+    </div>
+    <div class="modal-sub">Enter the IPO name — dates and GMP will be auto-fetched.</div>
+    <input class="modal-inp" type="text" id="modalInp" placeholder="e.g. ESDS Software Solution"/>
+    <div class="modal-err" id="modalErr"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-confirm" id="modalBtn" onclick="addIPO()">Add &amp; Fetch →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let ALL = [];
+let TOKEN = localStorage.getItem('ipo_token') || '';
+
+// THEME
+function toggleTheme(){
+  const html=document.documentElement;
+  const next=html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  document.getElementById('themeToggle').textContent=next==='dark'?'🌙':'☀️';
+  localStorage.setItem('ipo-theme',next);
+}
+(function(){
+  const t=localStorage.getItem('ipo-theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('themeToggle').textContent=t==='dark'?'🌙':'☀️';
+})();
+
+// AUTH CHECK
+function authHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+TOKEN};
+}
+async function checkAuth(){
+  if(!TOKEN){ window.location.href='/login'; return; }
+  try{
+    const r=await fetch('/api/auth/me',{headers:{'Authorization':'Bearer '+TOKEN}});
+    if(!r.ok){ window.location.href='/login'; return; }
+    const u=await r.json();
+    document.getElementById('userName').textContent=u.name;
+    document.getElementById('userAvatar').textContent=u.name[0].toUpperCase();
+  }catch(e){ window.location.href='/login'; }
+}
+
+// LOGOUT
+async function doLogout(){
+  await fetch('/api/auth/logout',{method:'POST'});
+  localStorage.removeItem('ipo_token');
+  localStorage.removeItem('ipo_user');
+  window.location.href='/login';
+}
+
+// LOAD
+async function load(){
+  try{
+    const r=await fetch('/api/ipos',{headers:authHeaders()});
+    if(r.status===401){ window.location.href='/login'; return; }
+    ALL=await r.json();
+    renderTable(ALL);
+    updateStats(ALL);
+  }catch(e){ toast('Could not load data','err'); }
+}
+
+// ADD MODAL
+function openAddModal(){
+  document.getElementById('addModal').classList.add('open');
+  document.getElementById('modalInp').value='';
+  document.getElementById('modalErr').style.display='none';
+  setTimeout(()=>document.getElementById('modalInp').focus(),80);
+}
+function closeAddModal(){ document.getElementById('addModal').classList.remove('open'); }
+
+async function addIPO(){
+  const name=document.getElementById('modalInp').value.trim();
+  const errEl=document.getElementById('modalErr');
+  if(!name){ errEl.textContent='Please enter an IPO name'; errEl.style.display='block'; return; }
+  const btn=document.getElementById('modalBtn');
+  btn.innerHTML='<span class="spin"></span>Fetching...'; btn.disabled=true;
+  errEl.style.display='none';
+  try{
+    const r=await fetch('/api/ipos',{method:'POST',headers:authHeaders(),body:JSON.stringify({name})});
+    const d=await r.json();
+    if(!r.ok){ errEl.textContent=d.error||'Error'; errEl.style.display='block'; return; }
+    ALL.unshift(d); renderTable(ALL); updateStats(ALL); closeAddModal();
+    toast(`✓ "${d.name}" added`,'ok');
+  }catch(e){ errEl.textContent='Network error'; errEl.style.display='block'; }
+  finally{ btn.innerHTML='Add & Fetch →'; btn.disabled=false; }
+}
+
+// REFRESH
+async function refreshIPO(id){
+  toast('Refreshing...','inf');
+  const r=await fetch(`/api/ipos/${id}/refresh`,{method:'POST',headers:authHeaders()});
+  const d=await r.json();
+  if(!r.ok){ toast(d.error||'Error','err'); return; }
+  const i=ALL.findIndex(x=>x.id===id);
+  if(i>=0) ALL[i]=d;
+  renderTable(ALL); updateStats(ALL);
+  toast('✓ Updated','ok');
+}
+async function refreshAll(){
+  const btn=document.getElementById('refreshBtn');
+  btn.innerHTML='<span class="spin" style="border-top-color:var(--muted)"></span>';
+  btn.disabled=true;
+  try{
+    const r=await fetch('/api/refresh-all',{method:'POST',headers:authHeaders()});
+    const d=await r.json();
+    if(!r.ok){ toast(d.error||'Error','err'); return; }
+    await load();
+    toast(`✓ ${d.updated} IPOs refreshed`,'ok');
+  }finally{ btn.innerHTML='↻ Refresh All'; btn.disabled=false; }
+}
+
+// DELETE
+async function deleteIPO(id,name){
+  if(!confirm(`Remove "${name}"?`)) return;
+  await fetch(`/api/ipos/${id}`,{method:'DELETE',headers:authHeaders()});
+  ALL=ALL.filter(x=>x.id!==id);
+  renderTable(ALL); updateStats(ALL);
+  toast('Removed','ok');
+}
+
+// SAVE FIELD
+async function saveField(id,field,value){
+  try{
+    const r=await fetch(`/api/ipos/${id}`,{method:'PUT',headers:authHeaders(),body:JSON.stringify({[field]:value})});
+    const d=await r.json();
+    const i=ALL.findIndex(x=>x.id===id);
+    if(i>=0) ALL[i]=d;
+    updateStats(ALL);
+  }catch(e){ toast('Save failed','err'); }
+}
+
+// EXPORT — sends token via query param since window.location can't set headers
+async function exportExcel(){
+  const r = await fetch('/api/export', { headers: authHeaders() });
+  if (r.status === 401) { window.location.href = '/login'; return; }
+  if (!r.ok) { toast('Export failed', 'err'); return; }
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'IPO_Tracker.xlsx'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// FILTER
+function filterTable(){
+  const q=document.getElementById('filterInp').value.toLowerCase();
+  renderTable(ALL.filter(x=>x.name.toLowerCase().includes(q)));
+}
+
+// STATS
+function updateStats(ipos){
+  document.getElementById('sTotal').textContent=ipos.length;
+  document.getElementById('countBadge').textContent=`${ipos.length} IPO${ipos.length!==1?'s':''}`;
+  const ap=ipos.filter(x=>x.acc1_applied==='Applied'||x.acc2_applied==='Applied'||x.acc3_applied==='Applied').length;
+  const al=ipos.filter(x=>x.acc1_status==='Allotted'||x.acc2_status==='Allotted'||x.acc3_status==='Allotted').length;
+  const na=ipos.filter(x=>x.acc1_status==='Not Allotted'||x.acc2_status==='Not Allotted'||x.acc3_status==='Not Allotted').length;
+  document.getElementById('sApplied').textContent=ap;
+  document.getElementById('sAllotted').textContent=al;
+  document.getElementById('sNotAllotted').textContent=na;
+  // Fetch P&L from API
+  fetch('/api/stats',{headers:authHeaders()}).then(r=>r.ok?r.json():null).then(s=>{
+    if(!s) return;
+    const gain=s.total_gain;
+    const ge=document.getElementById('sGain');
+    ge.textContent=(gain>=0?'₹+':'₹')+Math.abs(gain).toLocaleString('en-IN');
+    ge.style.color=gain>=0?'var(--green)':'var(--red)';
+    document.getElementById('sWin').textContent=s.win_rate+'%';
+  }).catch(()=>{});
+}
+
+// RENDER
+function gmpHtml(g){
+  const n=parseFloat(g);
+  if(isNaN(n)) return `<span class="gm">${g||'—'}</span>`;
+  return `<span class="${n>0?'gp':n<0?'gn':'gm'}">${n>0?'+':''}${g}</span>`;
+}
+function sel(field,id,val,opts){
+  return `<select class="editable" onchange="saveField(${id},'${field}',this.value)">${opts.map(o=>`<option ${val===o?'selected':''}>${o||'—'}</option>`).join('')}</select>`;
+}
+function inp(field,id,val,w){
+  return `<input class="editable" value="${val||''}" onblur="saveField(${id},'${field}',this.value)" style="min-width:${w||65}px"/>`;
+}
+function renderTable(ipos){
+  const tbody=document.getElementById('tbody');
+  if(!ipos.length){
+    tbody.innerHTML=`<tr><td colspan="21"><div class="empty"><div class="ei">📋</div><p>No IPOs yet</p><small style="font-size:12px">Click "+ Add IPO" above to get started</small></div></td></tr>`;
+    return;
+  }
+  const A=['','Applied','Not Applied'],S=['','Allotted','Not Allotted','Pending'],O=['','Allotted','Not Allotted','Partial','Pending'];
+  tbody.innerHTML=ipos.map((ipo,i)=>`
+    <tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td class="ipo-name-cell" title="${ipo.name}">${ipo.name}</td>
+      <td>${ipo.open_date||'—'}</td><td>${ipo.close_date||'—'}</td><td>${ipo.allotment_date||'—'}</td>
+      <td>${ipo.issue_price?'₹'+ipo.issue_price:'—'}</td>
+      <td>${gmpHtml(ipo.gmp)}</td>
+      <td>${sel('acc1_applied',ipo.id,ipo.acc1_applied,A)}</td>
+      <td>${sel('acc1_status', ipo.id,ipo.acc1_status, S)}</td>
+      <td>${sel('acc2_applied',ipo.id,ipo.acc2_applied,A)}</td>
+      <td>${sel('acc2_status', ipo.id,ipo.acc2_status, S)}</td>
+      <td>${sel('acc3_applied',ipo.id,ipo.acc3_applied,A)}</td>
+      <td>${sel('acc3_status', ipo.id,ipo.acc3_status, S)}</td>
+      <td>${inp('total_lots',      ipo.id,ipo.total_lots,55)}</td>
+      <td>${sel('allotment_status',ipo.id,ipo.allotment_status,O)}</td>
+      <td>${inp('shares_allotted', ipo.id,ipo.shares_allotted,55)}</td>
+      <td>${inp('listing_price',   ipo.id,ipo.listing_price,60)}</td>
+      <td>${inp('listing_gain',    ipo.id,ipo.listing_gain,70)}</td>
+      <td>${inp('notes',           ipo.id,ipo.notes,90)}</td>
+      <td style="font-size:11px;color:var(--muted)">${ipo.updated_at||'—'}</td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn-ghost" style="padding:4px 9px;font-size:11px" onclick="refreshIPO(${ipo.id})">↻</button>
+        <button class="btn-ghost" style="padding:4px 9px;font-size:11px;color:var(--red);border-color:rgba(239,68,68,.3)" onclick="deleteIPO(${ipo.id},'${ipo.name.replace(/'/g,"\\'")}')">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+// TOAST
+let tt;
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=`show ${type}`;
+  clearTimeout(tt); tt=setTimeout(()=>el.className='',3200);
+}
+
+// BOOT
+window.addEventListener('DOMContentLoaded',()=>{
+  checkAuth().then(()=>load());
+  document.getElementById('modalInp').addEventListener('keydown',e=>{if(e.key==='Enter') addIPO()});
+  document.getElementById('addModal').addEventListener('click',e=>{if(e.target.id==='addModal') closeAddModal()});
+});
+</script>
+</body>
+</html>
