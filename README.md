@@ -1,4 +1,4 @@
-﻿# IPOPoint
+# IPOPoint
 
 India's IPO discovery and tracking platform — live GMP, allotment dates, and a personal multi-account IPO tracker.
 
@@ -23,8 +23,8 @@ India's IPO discovery and tracking platform — live GMP, allotment dates, and a
 ### 1. Clone
 
 ```bash
-git clone https://github.com/Aryandadhich/IPOHUB.git
-cd IPOHUB
+git clone https://github.com/Aryandadhich/IPOPOINT.git
+cd IPOPOINT
 ```
 
 ### 2. Install dependencies
