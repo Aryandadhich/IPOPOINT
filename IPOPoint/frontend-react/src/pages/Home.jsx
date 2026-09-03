@@ -63,7 +63,9 @@ export default function Home() {
     let list = []
     if (tab === 'live')     list = allIPOs.filter(x => x.status === 'open')
     else if (tab === 'upcoming') list = allIPOs.filter(x => x.status === 'upcoming')
-    else if (tab === 'gmp') list = [...allIPOs].sort((a, b) => (b.gmp_num || 0) - (a.gmp_num || 0))
+    else if (tab === 'gmp') list = [...allIPOs]
+        .filter(x => x.status === 'open' && (x.gmp_num || 0) > 0)
+        .sort((a, b) => (b.gmp_num || 0) - (a.gmp_num || 0))
     else if (tab === 'allotted') list = allIPOs.filter(x => x.status === 'allotted' || x.status === 'listed')
     return applyTypeFilter(list)
   }
@@ -77,9 +79,9 @@ export default function Home() {
   }).length
 
   const tabCounts = {
-    live: liveCount,
+    live:     liveCount,
     upcoming: upcomingCount,
-    gmp: allIPOs.length,
+    gmp:      allIPOs.filter(x => x.status === 'open' && (x.gmp_num || 0) > 0).length,
     allotted: allIPOs.filter(x => x.status === 'allotted' || x.status === 'listed').length,
   }
 

@@ -13,7 +13,7 @@ function initials(n) {
 
 export default function GmpSidebar({ ipos }) {
   const top5 = [...ipos]
-    .filter(x => (x.gmp_num || 0) > 0)
+    .filter(x => (x.gmp_num || 0) > 0 && x.status === 'open')
     .sort((a, b) => (b.gmp_num || 0) - (a.gmp_num || 0))
     .slice(0, 5)
 
