@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+from flask_cors import CORS
 from .config import config_map
 from .extensions import db_init
 from .api.auth import auth_bp
@@ -19,6 +20,9 @@ def create_app(env: str = None) -> Flask:
         template_folder=os.path.join(os.path.dirname(__file__), "..", "..", "frontend"),
     )
     app.config.from_object(cfg)
+
+    # Allow React dev server (port 3000) to call the API
+    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}})
 
     # Initialise DB (creates tables if missing)
     db_init(app)

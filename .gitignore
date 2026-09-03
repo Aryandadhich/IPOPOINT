@@ -50,3 +50,8 @@ ipohub/
 
 # -- Local Excel tracker -------------------------------------------------------
 IPO.xlsx
+
+# -- React frontend (node_modules & build output) ----------------------------
+IPOPoint/frontend-react/node_modules/
+IPOPoint/frontend-react/dist/
+IPOPoint/frontend-react/.env.local
