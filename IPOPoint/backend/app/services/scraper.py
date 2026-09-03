@@ -6,6 +6,7 @@ hammering the site on every request.
 from __future__ import annotations
 import re
 import time
+from datetime import date as _date
 from difflib import SequenceMatcher
 from flask import current_app
 
@@ -98,7 +99,7 @@ def parse_all_ipos(lines: list[str]) -> list[dict]:
         elif "LISTED" in line.upper():
             status = "listed"
         elif len(dates) >= 2:
-            status = "open"
+            status = _resolve_status(dates[0], dates[1])
 
         ipos.append({
             "name":           raw_name,
@@ -154,6 +155,46 @@ def parse_ipo_block(lines: list[str], name: str) -> tuple[dict | None, float]:
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
+_MONTHS = {
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+    "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+
+def _parse_ipo_date(s: str) -> _date | None:
+    """Parse '3-Sep' style date into a date object (assumes current year)."""
+    try:
+        parts = s.strip().split("-")
+        if len(parts) != 2:
+            return None
+        day = int(parts[0])
+        mon = _MONTHS.get(parts[1].lower())
+        if not mon:
+            return None
+        today = _date.today()
+        # If parsed month is earlier than current month, it's probably next year
+        year = today.year if mon >= today.month else today.year + 1
+        return _date(year, mon, day)
+    except Exception:
+        return None
+
+
+def _resolve_status(open_str: str, close_str: str) -> str:
+    """Return 'open', 'upcoming', or 'allotted' based on today vs open/close dates."""
+    today    = _date.today()
+    open_dt  = _parse_ipo_date(open_str)
+    close_dt = _parse_ipo_date(close_str)
+
+    if open_dt is None or close_dt is None:
+        # Cannot determine — fall back to open (original behaviour)
+        return "open"
+
+    if today < open_dt:
+        return "upcoming"
+    if today > close_dt:
+        return "allotted"
+    return "open"
+
 
 def _similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
