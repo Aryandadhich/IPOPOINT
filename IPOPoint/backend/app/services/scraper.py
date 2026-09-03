@@ -78,6 +78,9 @@ def parse_all_ipos(lines: list[str]) -> list[dict]:
             i += 1
             continue
 
+        # Determine mainboard vs SME
+        ipo_type = "sme" if re.search(r"(BSE|NSE)\s+SME", line) else "mainboard"
+
         raw_name = re.sub(
             r"\s+(IPO[A-Z]*|BSE SME[A-Z]*|NSE SME[A-Z]*)$", "", line
         ).strip()
@@ -110,6 +113,7 @@ def parse_all_ipos(lines: list[str]) -> list[dict]:
             "allotment_date": dates[2] if len(dates) > 2 else "",
             "issue_price":    issue_price or "",
             "status":         status,
+            "ipo_type":       ipo_type,
         })
         i = j + 1
 

@@ -345,6 +345,21 @@ input, select, textarea { font-family: inherit; }
 }
 .sec-title { font-size: 15px; font-weight: 700; letter-spacing: -.2px; color: var(--text); }
 .sec-title em { font-style: normal; color: var(--accent); }
+.sec-controls {
+  display: flex; align-items: center; gap: 8px;
+}
+.type-filter {
+  display: flex; align-items: center;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 2px; gap: 2px;
+}
+.type-btn {
+  padding: 4px 11px; border-radius: 5px; font-size: 12px; font-weight: 600;
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.type-btn:hover { color: var(--text); }
+.type-btn.act   { background: var(--surface); color: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,.2); }
 .sec-refresh {
   font-size: 12px; font-weight: 600; color: var(--muted);
   padding: 4px 10px; border-radius: 6px;

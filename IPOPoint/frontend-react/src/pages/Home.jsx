@@ -31,6 +31,7 @@ function daysDiff(d) {
 export default function Home() {
   const [allIPOs, setAllIPOs]   = useState([])
   const [tab, setTab]           = useState('live')
+  const [typeFilter, setTypeFilter] = useState('all')   // 'all' | 'mainboard' | 'sme'
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -53,12 +54,18 @@ export default function Home() {
     setLoading(false)
   }
 
+  function applyTypeFilter(list) {
+    if (typeFilter === 'all') return list
+    return list.filter(x => (x.ipo_type || 'mainboard') === typeFilter)
+  }
+
   function getTabIPOs() {
-    if (tab === 'live')     return allIPOs.filter(x => x.status === 'open')
-    if (tab === 'upcoming') return allIPOs.filter(x => x.status === 'upcoming')
-    if (tab === 'gmp')      return [...allIPOs].sort((a, b) => (b.gmp_num || 0) - (a.gmp_num || 0))
-    if (tab === 'allotted') return allIPOs.filter(x => x.status === 'allotted' || x.status === 'listed')
-    return []
+    let list = []
+    if (tab === 'live')     list = allIPOs.filter(x => x.status === 'open')
+    else if (tab === 'upcoming') list = allIPOs.filter(x => x.status === 'upcoming')
+    else if (tab === 'gmp') list = [...allIPOs].sort((a, b) => (b.gmp_num || 0) - (a.gmp_num || 0))
+    else if (tab === 'allotted') list = allIPOs.filter(x => x.status === 'allotted' || x.status === 'listed')
+    return applyTypeFilter(list)
   }
 
   const liveCount     = allIPOs.filter(x => x.status === 'open').length
@@ -175,7 +182,24 @@ export default function Home() {
               {tab === 'gmp'      && <>Top <em>GMP</em></>}
               {tab === 'allotted' && <><em>Allotted</em> IPOs</>}
             </div>
-            <button className="sec-refresh" onClick={loadIPOs}>↻ Refresh</button>
+            <div className="sec-controls">
+              <div className="type-filter">
+                {[
+                  { value: 'all',       label: 'All'       },
+                  { value: 'mainboard', label: 'Mainboard' },
+                  { value: 'sme',       label: 'SME'       },
+                ].map(f => (
+                  <button
+                    key={f.value}
+                    className={`type-btn${typeFilter === f.value ? ' act' : ''}`}
+                    onClick={() => setTypeFilter(f.value)}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+              <button className="sec-refresh" onClick={loadIPOs}>↻ Refresh</button>
+            </div>
           </div>
 
           {tab === 'allotted' && (
